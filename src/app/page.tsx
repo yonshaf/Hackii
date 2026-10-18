@@ -14,13 +14,14 @@ export default function HomePage() {
   const router = useRouter();
   const [searchVal, setSearchVal] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchMode, setSearchMode] = useState<'normal' | 'agent'>('normal');
 
   const handleHeroSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchVal.trim()) {
-      router.push(`/explore?q=${encodeURIComponent(searchVal.trim())}`);
+    if (searchMode === 'agent') {
+      router.push(`/explore?mode_type=agent${searchVal.trim() ? `&q=${encodeURIComponent(searchVal.trim())}` : ''}`);
     } else {
-      router.push('/explore');
+      router.push(searchVal.trim() ? `/explore?q=${encodeURIComponent(searchVal.trim())}` : '/explore');
     }
   };
 
@@ -33,9 +34,47 @@ export default function HomePage() {
       {/* 1. Full-Bleed Editorial Campaign Hero */}
       <HeroCampaign />
 
-      {/* 2. Interactive Discovery Search & Category Strip */}
+      {/* 2. Interactive Discovery Search & Category Strip with Two Search Options */}
       <section className="w-full max-w-[1440px] mx-auto px-6 lg:px-12 -mt-6 sm:-mt-10 relative z-20">
-        <div className="bg-canvas border border-hairline shadow-md p-4 sm:p-6">
+        <div className="bg-canvas border border-hairline shadow-md p-4 sm:p-6 space-y-4">
+          {/* Two Search Options Tabs */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline-soft pb-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setSearchMode('normal')}
+                className={`px-4 py-2 text-xs font-semibold rounded-none border transition-all ${
+                  searchMode === 'normal'
+                    ? 'bg-ink text-canvas border-ink shadow-sm'
+                    : 'bg-soft-cloud text-mute border-hairline hover:text-ink'
+                }`}
+              >
+                Catalog Search (Instant · Free)
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSearchMode('agent')}
+                className={`px-4 py-2 text-xs font-semibold rounded-none border transition-all flex items-center gap-1.5 ${
+                  searchMode === 'agent'
+                    ? 'bg-ink text-canvas border-ink shadow-sm'
+                    : 'bg-soft-cloud text-mute border-hairline hover:text-ink'
+                }`}
+              >
+                <span>AI Agent Web Search</span>
+                <span className="bg-sale text-canvas text-[9px] uppercase px-1.5 py-0.2 rounded-full font-bold">
+                  Costs Credits
+                </span>
+              </button>
+            </div>
+
+            {searchMode === 'agent' && (
+              <span className="text-xs text-sale font-medium flex items-center gap-1">
+                <span>⚡ Deploys TinyFish autonomous browser scraper (Uses API credits)</span>
+              </span>
+            )}
+          </div>
+
           <form onSubmit={handleHeroSearch} className="flex flex-col sm:flex-row gap-3">
             <div className="search-pill-container flex-1 !h-12 !px-4">
               <Search className="w-5 h-5 text-mute mr-3 shrink-0" />
@@ -43,13 +82,22 @@ export default function HomePage() {
                 type="text"
                 value={searchVal}
                 onChange={(e) => setSearchVal(e.target.value)}
-                placeholder="Search by topic, university, hackathon name, or city..."
+                placeholder={
+                  searchMode === 'agent'
+                    ? 'Deploy agent to scrape: e.g. "Solana Hackathons in Lisbon 2026", "AI Summits" (Costs credits)...'
+                    : 'Search verified catalog by topic, organizer, university, or city (Instant & Free)...'
+                }
                 className="bg-transparent border-none outline-none text-base text-ink placeholder:text-mute w-full"
               />
             </div>
-            <button type="submit" className="btn-primary !h-12 !px-8 text-sm shrink-0">
-              <span>Find Events</span>
-              <ArrowRight className="w-4 h-4" />
+            <button
+              type="submit"
+              className={`btn-primary !h-12 !px-8 text-sm shrink-0 ${
+                searchMode === 'agent' ? '!bg-ink text-accent-purple-soft' : ''
+              }`}
+            >
+              <span>{searchMode === 'agent' ? 'Deploy Agent' : 'Find Events'}</span>
+              <ArrowRight className="w-4 h-4 ml-1.5" />
             </button>
           </form>
 
